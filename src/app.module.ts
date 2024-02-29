@@ -5,21 +5,28 @@ import { UsersModule } from './users/users.module';
 import { UsersController } from './users/users.controller';
 import { UsersService } from './users/users.service';
 import { ConfigModule } from '@nestjs/config';
-import Joi from '@hapi/joi';
+import * as Joi from '@hapi/joi';
+import { DatabaseModule } from './database/database.module';
+import { DataSource } from 'typeorm';
 
 @Module({
   imports: [
-    UsersModule,
     ConfigModule.forRoot({
       validationSchema: Joi.object({
+        POSTGRES_HOST: Joi.string().required(),
+        POSTGRES_PORT: Joi.number().required(),
         POSTGRES_USER: Joi.string().required(),
         POSTGRES_PASSWORD: Joi.string().required(),
         POSTGRES_DB: Joi.string().required(),
-        APPLICATION_PORT: Joi.number(),
+        PORT: Joi.number(),
       }),
     }),
+    DatabaseModule,
+    UsersModule,
   ],
   controllers: [AppController, UsersController],
   providers: [AppService, UsersService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(private dataSource: DataSource) {}
+}
